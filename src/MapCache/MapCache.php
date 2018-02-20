@@ -34,6 +34,7 @@ class MapCache
 
     public function checkMapCache(): bool
     {
+        return false;
         $this->mapCacheID = md5($this->serializeParams());
 
         $filename = $this->getFilename();
@@ -77,7 +78,8 @@ class MapCache
     public function cache(CanvasInterface $canvas): void
     {
         $this->mkdir_recursive(dirname($this->mapCacheIDToFilename()), 0777);
-        imagepng($canvas->getImage(), $this->mapCacheIDToFilename(), 9);
+
+        $canvas->getImage()->save($this->mapCacheIDToFilename());
 
         $output = new CacheOutput();
         $output->setFilename($this->mapCacheIDToFilename())

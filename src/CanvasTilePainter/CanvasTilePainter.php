@@ -2,8 +2,11 @@
 
 namespace StaticMapLite\CanvasTilePainter;
 
+use Imagine\Gd\Imagine;
+use Imagine\Image\Box;
+use Imagine\Image\ImageInterface;
+use Imagine\Image\Point;
 use StaticMapLite\Canvas\Canvas;
-use StaticMapLite\TileResolver\TileResolver;
 use StaticMapLite\TileResolver\TileResolverInterface;
 
 class CanvasTilePainter
@@ -13,6 +16,9 @@ class CanvasTilePainter
 
     /** @var TileResolverInterface $tileResolver */
     protected $tileResolver;
+
+    /** @var ImageInterface $tmpCanvasImage */
+    protected $tmpCanvasImage;
 
     public function __construct()
     {
@@ -26,15 +32,40 @@ class CanvasTilePainter
         return $this;
     }
 
-    public function setTileResolver(TileResolver $tileResolver): CanvasTilePainter
+    public function setTileResolver(TileResolverInterface $tileResolver): CanvasTilePainter
     {
         $this->tileResolver = $tileResolver;
 
         return $this;
     }
 
+    protected function createTmpCanvasImage(): CanvasTilePainter
+    {
+        $tileSize = $this->canvas->getTileSize();
+
+        $size = new Box($this->canvas->getWidth() + 2 * $tileSize, $this->canvas->getHeight() + 2 * $tileSize);
+
+        $imagine = new Imagine();
+        $this->tmpCanvasImage = $imagine->create($size);
+
+        return $this;
+    }
+
+    protected function cropToCanvas(): CanvasTilePainter
+    {
+        $tmpTopLeftPoint = new Point(256, 256);
+        $this->tmpCanvasImage->crop($tmpTopLeftPoint, $this->canvas->getImage()->getSize());
+
+        $topLeftPoint = new Point(0, 0);
+        $this->canvas->getImage()->paste($this->tmpCanvasImage, $topLeftPoint);
+
+        return $this;
+    }
+
     public function paint(): CanvasTilePainter
     {
+        $this->createTmpCanvasImage();
+
         $startX = floor($this->canvas->getCenterX() - ($this->canvas->getWidth() / $this->canvas->getTileSize()) / 2);
         $startY = floor($this->canvas->getCenterY() - ($this->canvas->getHeight() / $this->canvas->getTileSize()) / 2);
         $endX = ceil($this->canvas->getCenterX() + ($this->canvas->getWidth() / $this->canvas->getTileSize()) / 2);
@@ -47,37 +78,25 @@ class CanvasTilePainter
         $offsetX += floor($startX - floor($this->canvas->getCenterX())) * $this->canvas->getTileSize();
         $offsetY += floor($startY - floor($this->canvas->getCenterY())) * $this->canvas->getTileSize();
 
+        $box = new Box(256, 256);
+
         for ($x = $startX; $x <= $endX; $x++) {
             for ($y = $startY; $y <= $endY; $y++) {
-                $tileData = $this->tileResolver->fetch($this->canvas->getZoom(), $x, $y);
-
-                if ($tileData) {
-                    $tileImage = $this->createTile($tileData);
-                } else {
-                    $tileImage = $this->createErrorTile();
-                }
+                $tileImage = $this->tileResolver->fetch($this->canvas->getZoom(), $x, $y);
 
                 $destX = ($x - $startX) * $this->canvas->getTileSize() + $offsetX;
                 $destY = ($y - $startY) * $this->canvas->getTileSize() + $offsetY;
 
-                imagecopy($this->canvas->getImage(), $tileImage, $destX, $destY, 0, 0, $this->canvas->getTileSize(), $this->canvas->getTileSize());
+                $point = new Point($destX + 256, $destY + 256);
+
+                if ($this->tmpCanvasImage->getSize()->contains($box, $point)) {
+                    $this->tmpCanvasImage->paste($tileImage, $point);
+                }
             }
         }
 
+        $this->cropToCanvas();
+
         return $this;
-    }
-
-    protected function createTile(string $tileData)
-    {
-        return imagecreatefromstring($tileData);
-    }
-
-    protected function createErrorTile()
-    {
-        $tileImage = imagecreate($this->canvas->getTileSize(), $this->canvas->getTileSize());
-        $color = imagecolorallocate($tileImage, 255, 255, 255);
-        @imagestring($tileImage, 1, 127, 127, 'err', $color);
-
-        return $tileImage;
     }
 }

@@ -2,6 +2,13 @@
 
 namespace StaticMapLite\ElementPrinter\Marker;
 
+use Imagine\Gd\Font;
+use Imagine\Image\AbstractFont;
+use Imagine\Image\Box;
+use Imagine\Image\ImageInterface;
+use Imagine\Image\ImagineInterface;
+use Imagine\Image\Point;
+use Imagine\Image\Point\Center;
 use StaticMapLite\Canvas\Canvas;
 use StaticMapLite\Element\Marker\AbstractMarker;
 use StaticMapLite\Element\Marker\ExtraMarker;
@@ -9,6 +16,21 @@ use StaticMapLite\Util;
 
 class ExtraMarkerPrinter
 {
+    /** @var int $iconOffsetX */
+    protected $iconOffsetX = 0;
+
+    /** @var int $iconOffsetY */
+    protected $iconOffsetY = -12;
+
+    /** @var int $shadowOffsetX */
+    protected $shadowOffsetX = 24;
+
+    /** @var int $shadowOffsetY */
+    protected $shadowOffsetY = 18;
+
+    /** @var ImagineInterface $imagine */
+    protected $imagine;
+
     /** @var ExtraMarker $marker */
     protected $marker = null;
 
@@ -29,7 +51,7 @@ class ExtraMarkerPrinter
 
     public function __construct()
     {
-
+        $this->imagine = new \Imagine\Gd\Imagine();
     }
 
     public function setMarkerSize(float $markerSize): ExtraMarkerPrinter
@@ -48,7 +70,7 @@ class ExtraMarkerPrinter
 
     public function paint(Canvas $canvas): ExtraMarkerPrinter
     {
-        //$this->paintShadow($canvas); looks like shadows are currently broken, will fix that later
+        $this->paintShadow($canvas);
         $this->paintMarker($canvas);
 
         return $this;
@@ -61,69 +83,65 @@ class ExtraMarkerPrinter
         $destX = floor(($canvas->getWidth() / 2) - $canvas->getTileSize() * ($canvas->getCenterX() - Util::lonToTile($this->marker->getLongitude(), $canvas->getZoom())));
         $destY = floor(($canvas->getHeight() / 2) - $canvas->getTileSize() * ($canvas->getCenterY() - Util::latToTile($this->marker->getLatitude(), $canvas->getZoom())));
 
-        $markerWidth = imagesx($markerImage);
-        $markerHeight = imagesy($markerImage);
+        $destX -= $markerImage->getSize()->getWidth() * $this->markerSize / 2;
+        $destY -= $markerImage->getSize()->getHeight() * $this->markerSize;
 
-        $destX -= $markerWidth * $this->markerSize / 2;
-        $destY -= $markerHeight * $this->markerSize;
+        $point = new Point($destX, $destY);
 
-        imagecopyresampled(
-            $canvas->getImage(),
-            $markerImage,
-            $destX,
-            $destY,
-            0,
-            0,
-            $markerWidth * $this->markerSize,
-            $markerHeight * $this->markerSize,
-            $markerWidth,
-            $markerHeight
-        );
+        if ($canvas->getImage()->getSize()->contains($markerImage->getSize(), $point)) {
+            $canvas->getImage()->paste($markerImage, $point);
+        }
 
         return $this;
     }
 
-    protected function createMarker()
+    protected function createMarker(): ImageInterface
     {
-        $extramarkersImgUrl = __DIR__.'/../../../images/extramarkers.png';
-        $extramarkers = imagecreatefrompng($extramarkersImgUrl);
-
-        $markerImage = imagecreatetruecolor($this->baseMarkerWidth, $this->baseMarkerHeight);
-        $transparentColor = imagecolorallocatealpha($markerImage, 0, 0, 0, 127);
-        imagefill($markerImage, 0, 0, $transparentColor);
+        $extramarkers = $this
+            ->imagine
+            ->open(__DIR__.'/../../../images/extramarkers.png')
+        ;
 
         $sourceX = $this->baseMarkerWidth * $this->marker->getColor();
         $sourceY = $this->baseMarkerHeight * $this->marker->getShape();
 
-        imagecopy(
-            $markerImage,
-            $extramarkers,
-            0,
-            0,
-            $sourceX,
-            $sourceY,
-            $this->baseMarkerWidth,
-            $this->baseMarkerHeight
-        );
+        $point = new Point($sourceX, $sourceY);
+        $box = new Box($this->baseMarkerWidth, $this->baseMarkerHeight);
+
+        $markerImage = $extramarkers->crop($point, $box);
 
         $this->writeMarker($markerImage);
 
         return $markerImage;
     }
 
-    protected function writeMarker($markerImage)
+    protected function writeMarker(ImageInterface $markerImage): ExtraMarkerPrinter
     {
-        $fontSize = 20;
-        $fontFile = __DIR__.'/../../../fonts/fontawesome-webfont.ttf';
         $text = json_decode(sprintf('"&#x%s;"', $this->marker->getAwesome()));
+        $font = $this->getFont($markerImage);
 
-        $bbox = imagettfbbox($fontSize, 0, $fontFile, $text);
+        $textBox = $font->box($text);
+        $textCenterPosition = new Center($textBox);
+        $imageCenterPosition = new Center($markerImage->getSize());
+        $centeredTextPosition = new Point(
+            $imageCenterPosition->getX() - $textCenterPosition->getX() + $this->iconOffsetX,
+            $imageCenterPosition->getY() - $textCenterPosition->getY() + $this->iconOffsetY
+        );
 
-        $x = $bbox[0] + (imagesx($markerImage) / 2) - ($bbox[4] / 2) + 3;
-        $y = 42;
+        $markerImage->draw()->text($text, $font, $centeredTextPosition);
 
-        $white = imagecolorallocate($markerImage, 255, 255, 255);
-        imagettftext($markerImage, $fontSize, 0, $x, $y, $white, $fontFile, $text);
+        return $this;
+    }
+
+    protected function getFont(ImageInterface $markerImage): AbstractFont
+    {
+        $fontColor = $markerImage->palette()->color('fff');
+        $fontSize = 20;
+        $fontFilename = __DIR__.'/../../../fonts/fontawesome-webfont.ttf';
+
+        $font = new Font($fontFilename, $fontSize, $fontColor);
+
+        return $font;
     }
 
     protected function paintShadow(Canvas $canvas): ExtraMarkerPrinter
@@ -136,41 +154,19 @@ class ExtraMarkerPrinter
         $destX -= $this->baseShadowWidth * $this->markerSize;
         $destY -= $this->baseShadowHeight;
 
-        imagecopyresampled(
-            $canvas->getImage(),
-            $shadowImage,
-            $destX,
-            $destY,
-            0,
-            0,
-            $this->baseShadowWidth,
-            $this->baseShadowHeight,
-            $this->baseShadowWidth,
-            $this->baseShadowHeight
-        );
+        $point = new Point($destX + $this->shadowOffsetX, $destY + $this->shadowOffsetY);
+
+        $canvas->getImage()->paste($shadowImage, $point);
 
         return $this;
     }
 
-    protected function createShadow()
+    protected function createShadow(): ImageInterface
     {
-        $shadowImgUrl = __DIR__.'/../../../images/marker_shadow.png';
-        $shadow = imagecreatefrompng($shadowImgUrl);
-
-        $shadowImage = imagecreatetruecolor(21, 14);
-        $transparentColor = imagecolorallocatealpha($shadowImage, 255, 255, 255, 0);
-        imagefill($shadowImage, 0, 0, $transparentColor);
-
-        imagecopy(
-            $shadow,
-            $shadowImage,
-            0,
-            0,
-            0,
-            0,
-            $this->baseShadowWidth,
-            $this->baseShadowHeight
-        );
+        $shadowImage = $this
+            ->imagine
+            ->open(__DIR__.'/../../../images/marker_shadow.png')
+        ;
 
         return $shadowImage;
     }
