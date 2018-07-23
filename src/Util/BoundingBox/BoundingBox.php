@@ -1,6 +1,6 @@
 <?php
 
-namespace StaticMapLite;
+namespace StaticMapLite\Util\BoundingBox;
 
 class BoundingBox
 {

@@ -2,10 +2,10 @@
 
 namespace StaticMapLite\Guesser;
 
-use StaticMapLite\BoundingBox;
 use StaticMapLite\Element\Marker\MarkerInterface;
 use StaticMapLite\Element\Polyline\Polyline;
 use StaticMapLite\Printer\PrinterInterface;
+use StaticMapLite\Util\BoundingBox\BoundingBox;
 
 class MapZoomGuesser
 {
