@@ -11,7 +11,9 @@ class MapZoomParser extends AbstractParser
 
     public function parse(): ParserInterface
     {
-        $this->printer->setZoom($_GET['zoom']);
+        if (isset($_GET['zoom'])) {
+            $this->printer->setZoom($_GET['zoom']);
+        }
 
         return $this;
     }
