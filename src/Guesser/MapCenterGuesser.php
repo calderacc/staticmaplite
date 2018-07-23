@@ -2,22 +2,11 @@
 
 namespace StaticMapLite\Guesser;
 
-use StaticMapLite\Printer\PrinterInterface;
 use StaticMapLite\Util\BoxFitter\BoxFitter;
 
-class MapCenterGuesser
+class MapCenterGuesser extends AbstractGuesser
 {
-    /** @var PrinterInterface $printer */
-    protected $printer;
-
-    public function setPrinter(PrinterInterface $printer): MapCenterGuesser
-    {
-        $this->printer = $printer;
-
-        return $this;
-    }
-
-    public function guess(): MapCenterGuesser
+    public function guess(): GuesserInterface
     {
         if (!$this->printer->getLatitude() || !$this->printer->getLongitude()) {
             $boundingBox = (new BoxFitter())

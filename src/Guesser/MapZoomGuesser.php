@@ -2,22 +2,11 @@
 
 namespace StaticMapLite\Guesser;
 
-use StaticMapLite\Printer\PrinterInterface;
 use StaticMapLite\Util\BoxFitter\BoxFitter;
 
-class MapZoomGuesser
+class MapZoomGuesser extends AbstractGuesser
 {
-    /** @var PrinterInterface $printer */
-    protected $printer;
-
-    public function setPrinter(PrinterInterface $printer): MapZoomGuesser
-    {
-        $this->printer = $printer;
-
-        return $this;
-    }
-
-    public function guess(): MapZoomGuesser
+    public function guess(): GuesserInterface
     {
         if (!$this->printer->getZoom()) {
             $zoomLevel = $this->computeZoomLevel();

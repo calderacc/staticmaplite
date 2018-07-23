@@ -2,21 +2,9 @@
 
 namespace StaticMapLite\Guesser;
 
-use StaticMapLite\Printer\PrinterInterface;
-
-class MapTypeGuesser
+class MapTypeGuesser extends AbstractGuesser
 {
-    /** @var PrinterInterface $printer */
-    protected $printer;
-
-    public function setPrinter(PrinterInterface $printer): MapTypeGuesser
-    {
-        $this->printer = $printer;
-
-        return $this;
-    }
-
-    public function guess(): MapTypeGuesser
+    public function guess(): GuesserInterface
     {
         if (!$this->printer->getMaptype()) {
             $this->printer->setMaptype('wikimedia-intl');
