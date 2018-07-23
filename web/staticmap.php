@@ -39,6 +39,7 @@ $query->setPrinter($printer)->execute();
 $guesserList = [
     new StaticMapLite\Guesser\MapCenterGuesser(),
     new \StaticMapLite\Guesser\MapTypeGuesser(),
+    new \StaticMapLite\Guesser\MapZoomGuesser(),
 ];
 
 foreach ($guesserList as $guesser) {
