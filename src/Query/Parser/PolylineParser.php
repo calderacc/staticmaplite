@@ -23,7 +23,7 @@ class PolylineParser extends AbstractParser
 
                 $polylineString = base64_decode($polyline64String);
 
-                $polyline = new Polyline($polylineString, $colorRed, $colorGreen, $colorBlue);
+                $polyline = new Polyline($polylineString, intval($colorRed), intval($colorGreen), intval($colorBlue));
 
                 $this->printer->addPolyline($polyline);
             }
