@@ -43,7 +43,7 @@ class MapZoomGuesser extends AbstractGuesser
 
         $viewHeightHalf = $this->printer->getHeight() / 2.0;
 
-        $zoomFactorPowered = $viewHeightHalf / (40.7436654315252 * ($vy1 - $vy0));
+        $zoomFactorPowered = $viewHeightHalf / (40.7436654315252 * ($vy1 - $vy0 + 0.0001));
 
         $resolutionVertical = 360.0 / ($zoomFactorPowered * 256);
 
