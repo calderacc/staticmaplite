@@ -12,9 +12,11 @@ class MapCenterParser extends AbstractParser
 
     public function parse(): ParserInterface
     {
-        list($centerLatitude, $centerLongitude) = explode(',', $_GET['center']);
+        if (isset($_GET['center'])) {
+            list($centerLatitude, $centerLongitude) = explode(',', $_GET['center']);
 
-        $this->printer->setCenter(floatval($centerLatitude), floatval($centerLongitude));
+            $this->printer->setCenter(floatval($centerLatitude), floatval($centerLongitude));
+        }
 
         return $this;
     }
