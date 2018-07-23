@@ -28,6 +28,7 @@ class PolylineParser extends AbstractParser
                 $this->printer->addPolyline($polyline);
             }
         }
+
         return $this;
     }
 }

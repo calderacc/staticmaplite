@@ -2,7 +2,9 @@
 
 namespace StaticMapLite\Guesser;
 
+use StaticMapLite\BoundingBox;
 use StaticMapLite\Element\Marker\MarkerInterface;
+use StaticMapLite\Element\Polyline\Polyline;
 use StaticMapLite\Printer\PrinterInterface;
 
 class MapCenterGuesser
@@ -20,45 +22,66 @@ class MapCenterGuesser
     public function guess(): MapCenterGuesser
     {
         if (!$this->printer->getLatitude() || !$this->printer->getLongitude()) {
-            if (count($this->printer->getMarkers()) === 1) {
-                /** @var MarkerInterface $marker */
-                $marker = $this->printer->getMarkers()[0];
+            $boundingBox = $this->computeBoundingBox();
 
-                $this->printer
-                    ->setLatitude($marker->getLatitude())
-                    ->setLongitude($marker->getLongitude());
-            } elseif (count($this->printer->getMarkers()) > 1) {
-                $north = null;
-                $west = null;
-                $south = null;
-                $east = null;
+            $centerLongitude = $boundingBox->getWest() + ($boundingBox->getEast() - $boundingBox->getWest()) / 2.0;
+            $centerLatitude = $boundingBox->getSouth() + ($boundingBox->getNorth() - $boundingBox->getSouth()) / 2.0;
 
-                /** @var MarkerInterface $marker */
-                foreach ($this->printer->getMarkers() as $marker) {
-                    if (!$north || $marker->getLatitude() > $north) {
-                        $north = $marker->getLatitude();
-                    }
-
-                    if (!$south || $marker->getLatitude() < $south) {
-                        $south = $marker->getLatitude();
-                    }
-
-                    if (!$west || $marker->getLongitude() < $west) {
-                        $west = $marker->getLongitude();
-                    }
-
-                    if (!$east || $marker->getLongitude() > $east) {
-                        $east = $marker->getLongitude();
-                    }
-                }
-
-                $centerLongitude = $west + ($east - $west) / 2.0;
-                $centerLatitude = $south + ($north - $south) / 2.0;
-
-                $this->printer->setLatitude($centerLatitude)->setLongitude($centerLongitude);
-            }
+            $this->printer->setLatitude($centerLatitude)->setLongitude($centerLongitude);
         }
 
         return $this;
+    }
+
+    protected function computeBoundingBox(): BoundingBox
+    {
+        $boundingBox = new BoundingBox();
+
+        /** @var MarkerInterface $marker */
+        foreach ($this->printer->getMarkers() as $marker) {
+            if (!$boundingBox->getNorth() || $marker->getLatitude() > $boundingBox->getNorth()) {
+                $boundingBox->setNorth($marker->getLatitude());
+            }
+
+            if (!$boundingBox->getSouth() || $marker->getLatitude() < $boundingBox->getSouth()) {
+                $boundingBox->setSouth($marker->getLatitude());
+            }
+
+            if (!$boundingBox->getWest() || $marker->getLongitude() < $boundingBox->getWest()) {
+                $boundingBox->setWest($marker->getLongitude());
+            }
+
+            if (!$boundingBox->getEast() || $marker->getLongitude() > $boundingBox->getEast()) {
+                $boundingBox->setEast($marker->getLongitude());
+            }
+        }
+
+        /** @var Polyline $polyline */
+        foreach ($this->printer->getPolylines() as $polyline) {
+            $polylineList = \Polyline::decode($polyline->getPolyline());
+
+            while (!empty($polylineList)) {
+                $latitude = array_shift($polylineList);
+                $longitude = array_shift($polylineList);
+
+                if (!$boundingBox->getNorth() || $latitude > $boundingBox->getNorth()) {
+                    $boundingBox->setNorth($latitude);
+                }
+
+                if (!$boundingBox->getSouth() || $latitude < $boundingBox->getSouth()) {
+                    $boundingBox->setSouth($latitude);
+                }
+
+                if (!$boundingBox->getWest() || $longitude < $boundingBox->getWest()) {
+                    $boundingBox->setWest($longitude);
+                }
+
+                if (!$boundingBox->getEast() || $longitude > $boundingBox->getEast()) {
+                    $boundingBox->setEast($longitude);
+                }
+            }
+        }
+
+        return $boundingBox;
     }
 }
