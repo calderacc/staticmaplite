@@ -27,6 +27,35 @@ class MapCenterGuesser
                 $this->printer
                     ->setLatitude($marker->getLatitude())
                     ->setLongitude($marker->getLongitude());
+            } elseif (count($this->printer->getMarkers()) > 1) {
+                $north = null;
+                $west = null;
+                $south = null;
+                $east = null;
+
+                /** @var MarkerInterface $marker */
+                foreach ($this->printer->getMarkers() as $marker) {
+                    if (!$north || $marker->getLatitude() > $north) {
+                        $north = $marker->getLatitude();
+                    }
+
+                    if (!$south || $marker->getLatitude() < $south) {
+                        $south = $marker->getLatitude();
+                    }
+
+                    if (!$west || $marker->getLongitude() < $west) {
+                        $west = $marker->getLongitude();
+                    }
+
+                    if (!$east || $marker->getLongitude() > $east) {
+                        $east = $marker->getLongitude();
+                    }
+                }
+
+                $centerLongitude = $west + ($east - $west) / 2.0;
+                $centerLatitude = $south + ($north - $south) / 2.0;
+
+                $this->printer->setLatitude($centerLatitude)->setLongitude($centerLongitude);
             }
         }
 
