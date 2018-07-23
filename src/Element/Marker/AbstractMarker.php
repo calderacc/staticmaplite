@@ -1,15 +1,8 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: maltehuebner
- * Date: 29.09.17
- * Time: 15:46
- */
 
 namespace StaticMapLite\Element\Marker;
 
-
-class AbstractMarker
+class AbstractMarker implements MarkerInterface
 {
     protected $latitude;
     protected $longitude;

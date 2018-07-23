@@ -2,7 +2,7 @@
 
 namespace StaticMapLite\Guesser;
 
-use StaticMapLite\Element\Marker\Marker;
+use StaticMapLite\Element\Marker\MarkerInterface;
 use StaticMapLite\Printer\PrinterInterface;
 
 class MapCenterGuesser
@@ -16,11 +16,12 @@ class MapCenterGuesser
 
         return $this;
     }
+
     public function guess(): MapCenterGuesser
     {
         if (!$this->printer->getLatitude() || !$this->printer->getLongitude()) {
             if (count($this->printer->getMarkers()) === 1) {
-                /** @var Marker $marker */
+                /** @var MarkerInterface $marker */
                 $marker = $this->printer->getMarkers()[0];
 
                 $this->printer
