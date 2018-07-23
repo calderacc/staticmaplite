@@ -14,8 +14,8 @@ class MapCenterGuesser extends AbstractGuesser
                 ->setPolylines($this->printer->getPolylines())
                 ->fit();
 
-            $centerLongitude = $boundingBox->getWest() + ($boundingBox->getEast() - $boundingBox->getWest()) / 2.0;
-            $centerLatitude = $boundingBox->getSouth() + ($boundingBox->getNorth() - $boundingBox->getSouth()) / 2.0;
+            $centerLongitude = floatval($boundingBox->getWest() + ($boundingBox->getEast() - $boundingBox->getWest()) / 2.0);
+            $centerLatitude = floatval($boundingBox->getSouth() + ($boundingBox->getNorth() - $boundingBox->getSouth()) / 2.0);
 
             $this->printer->setLatitude($centerLatitude)->setLongitude($centerLongitude);
         }

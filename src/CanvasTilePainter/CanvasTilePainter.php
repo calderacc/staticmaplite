@@ -82,7 +82,7 @@ class CanvasTilePainter
 
         for ($x = $startX; $x <= $endX; $x++) {
             for ($y = $startY; $y <= $endY; $y++) {
-                $tileImage = $this->tileResolver->fetch($this->canvas->getZoom(), $x, $y);
+                $tileImage = $this->tileResolver->fetch($this->canvas->getZoom(), intval($x), intval($y));
 
                 $destX = ($x - $startX) * $this->canvas->getTileSize() + $offsetX;
                 $destY = ($y - $startY) * $this->canvas->getTileSize() + $offsetY;

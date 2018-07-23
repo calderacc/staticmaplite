@@ -13,7 +13,7 @@ class MapSizeParser extends AbstractParser
     {
         list($width, $height) = explode('x', $_GET['size']);
 
-        $this->printer->setSize($width, $height);
+        $this->printer->setSize(intval($width), intval($height));
 
         return $this;
     }
