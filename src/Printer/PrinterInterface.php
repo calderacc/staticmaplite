@@ -37,10 +37,10 @@ interface PrinterInterface
     public function getZoom(): int;
     public function setZoom(int $zoom): PrinterInterface;
 
-    public function getLatitude(): float;
+    public function getLatitude(): ?float;
     public function setLatitude(float $lat): PrinterInterface;
 
-    public function getLongitude(): float;
+    public function getLongitude(): ?float;
     public function setLongitude(float $lon): PrinterInterface;
 
     public function getWidth(): int;

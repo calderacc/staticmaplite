@@ -194,7 +194,7 @@ abstract class AbstractPrinter implements PrinterInterface
         return $this;
     }
 
-    public function getLatitude(): float
+    public function getLatitude(): ?float
     {
         return $this->latitude;
     }
@@ -206,7 +206,7 @@ abstract class AbstractPrinter implements PrinterInterface
         return $this;
     }
 
-    public function getLongitude(): float
+    public function getLongitude(): ?float
     {
         return $this->longitude;
     }
