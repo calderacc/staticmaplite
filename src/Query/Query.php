@@ -5,6 +5,11 @@ namespace StaticMapLite\Query;
 use StaticMapLite\Element\Factory\Marker\ExtraMarkerFactory;
 use StaticMapLite\Element\Polyline\Polyline;
 use StaticMapLite\Printer\PrinterInterface;
+use StaticMapLite\Query\Parser\MapCenterParser;
+use StaticMapLite\Query\Parser\MapSizeParser;
+use StaticMapLite\Query\Parser\MapTypeParser;
+use StaticMapLite\Query\Parser\MapZoomParser;
+use StaticMapLite\Query\Parser\ParserInterface;
 
 class Query
 {
@@ -20,22 +25,24 @@ class Query
 
     public function execute(): Query
     {
-        list($centerLatitude, $centerLongitude) = explode(',', $_GET['center']);
-        list($width, $height) = explode('x', $_GET['size']);
+        $parserList = [
+            new MapCenterParser(),
+            new MapSizeParser(),
+            new MapTypeParser(),
+            new MapZoomParser(),
+        ];
 
-        $this->printer
-            ->setCenter(floatval($centerLatitude), floatval($centerLongitude))
-            ->setZoom($_GET['zoom'])
-            ->setSize($width, $height)
-            ->setMapType($_GET['maptype'])
-        ;
+        /** @var ParserInterface $parser */
+        foreach ($parserList as $parser) {
+            $parser->setPrinter($this->printer)->parse();
+        }
 
         $markers = isset($_GET['markers']) ? $_GET['markers'] : null;
 
         if ($markers) {
             $markerList = explode('|', $markers);
             $markerFactory = new ExtraMarkerFactory();
-            
+
             foreach ($markerList as $markerData) {
                 list($markerLatitude, $markerLongitude, $markerShape, $markerColor, $markerIcon) = explode(',', $markerData);
 
