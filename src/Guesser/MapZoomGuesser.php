@@ -26,28 +26,29 @@ class MapZoomGuesser extends AbstractGuesser
 
         // inspired by https://gis.stackexchange.com/a/19652
 
-        $ry1 = log(sin(deg2rad($boundingBox->getEast())) + 1) /
-            cos(deg2rad($boundingBox->getEast()));
+        $ry1 = log((sin(deg2rad($boundingBox->getSouth())) + 1.0) /
+            cos(deg2rad($boundingBox->getSouth())));
 
-        $ry2 = log(sin(deg2rad($boundingBox->getWest())) + 1) /
-            cos(deg2rad($boundingBox->getWest()));
+        $ry2 = log((sin(deg2rad($boundingBox->getNorth())) + 1.0) /
+            cos(deg2rad($boundingBox->getNorth())));
 
-        $ryc = ($ry1 + $ry2) / 2;
+        $ryc = ($ry1 + $ry2) / 2.0;
 
         $centerY = rad2deg(atan(sinh($ryc)));
 
-        $resolutionHorizontal = ($boundingBox->getNorth() - $boundingBox->getSouth()) / $this->printer->getWidth();
+        $resolutionHorizontal = ($boundingBox->getEast() - $boundingBox->getWest()) / $this->printer->getWidth();
 
         $vy0 = log(tan(pi() * (0.25 + $centerY / 360.0)));
-        $vy1 = log(tan(pi() * (0.25 + $boundingBox->getWest() / 360.0)));
+        $vy1 = log(tan(pi() * (0.25 + $boundingBox->getNorth() / 360.0)));
 
         $viewHeightHalf = $this->printer->getHeight() / 2.0;
 
         $zoomFactorPowered = $viewHeightHalf / (40.7436654315252 * ($vy1 - $vy0));
+
         $resolutionVertical = 360.0 / ($zoomFactorPowered * 256);
 
-        $resolution = max([$resolutionHorizontal, $resolutionVertical]) * 1.2;
+        $resolution = max([$resolutionHorizontal, $resolutionVertical]) * 2;
 
-        return intval(log(360 / ($resolution * 256), 2));
+        return intval(log(360.0 / ($resolution * 256.0), 2));
     }
 }
