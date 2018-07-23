@@ -47,7 +47,7 @@ class MapZoomGuesser extends AbstractGuesser
 
         $resolutionVertical = 360.0 / ($zoomFactorPowered * 256);
 
-        $resolution = max([$resolutionHorizontal, $resolutionVertical]) * 2;
+        $resolution = max([$resolutionHorizontal, $resolutionVertical]) * 1.25;
 
         return intval(log(360.0 / ($resolution * 256.0), 2));
     }
