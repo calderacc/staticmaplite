@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace StaticMapLite\Guesser;
 
@@ -50,6 +50,4 @@ class MapZoomGuesser extends AbstractGuesser
 
         return log(360 / ($resolution * 256), 2);
     }
-
-
 }
