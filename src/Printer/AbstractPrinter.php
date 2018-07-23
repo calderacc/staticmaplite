@@ -35,9 +35,6 @@ abstract class AbstractPrinter implements PrinterInterface
         'wikimedia-intl' => 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
     ];
 
-    /** @var string $tileDefaultSrc */
-    protected $tileDefaultSrc = 'mapnik';
-
     /** @var bool $useTileCache */
     protected $useTileCache = true;
 
@@ -146,18 +143,6 @@ abstract class AbstractPrinter implements PrinterInterface
         return $this;
     }
 
-    public function getTileDefaultSrc(): string
-    {
-        return $this->tileDefaultSrc;
-    }
-
-    public function setTileDefaultSrc(string $tileDefaultSrc): PrinterInterface
-    {
-        $this->tileDefaultSrc = $tileDefaultSrc;
-
-        return $this;
-    }
-
     public function getOsmLogo(): string
     {
         return $this->osmLogo;
@@ -254,7 +239,7 @@ abstract class AbstractPrinter implements PrinterInterface
         return $this;
     }
 
-    public function getMaptype(): string
+    public function getMaptype(): ?string
     {
         return $this->maptype;
     }

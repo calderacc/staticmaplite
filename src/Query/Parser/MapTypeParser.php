@@ -11,7 +11,9 @@ class MapTypeParser extends AbstractParser
 
     public function parse(): ParserInterface
     {
-        $this->printer->setMapType($_GET['maptype']);
+        if ($_GET['maptype']) {
+            $this->printer->setMapType($_GET['maptype']);
+        }
 
         return $this;
     }

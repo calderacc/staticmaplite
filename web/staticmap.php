@@ -36,8 +36,14 @@ $printer = new Printer();
 $query = new \StaticMapLite\Query\Query();
 $query->setPrinter($printer)->execute();
 
-$guesser = new StaticMapLite\Guesser\MapCenterGuesser();
-$guesser->setPrinter($printer)->guess();
+$guesserList = [
+    new StaticMapLite\Guesser\MapCenterGuesser(),
+    new \StaticMapLite\Guesser\MapTypeGuesser(),
+];
+
+foreach ($guesserList as $guesser) {
+    $guesser->setPrinter($printer)->guess();
+}
 
 $printer->showMap();
 

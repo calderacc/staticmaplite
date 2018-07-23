@@ -25,9 +25,6 @@ interface PrinterInterface
     public function getTileSrcUrl(): array;
     public function setTileSrcUrl(array $tileSrcUrl): PrinterInterface;
 
-    public function getTileDefaultSrc(): string;
-    public function setTileDefaultSrc(string $tileDefaultSrc): PrinterInterface;
-
     public function getOsmLogo(): string;
     public function setOsmLogo(string $osmLogo): PrinterInterface;
 
@@ -52,7 +49,7 @@ interface PrinterInterface
     public function getImage();
     public function setImage($image): PrinterInterface;
 
-    public function getMaptype(): string;
+    public function getMaptype(): ?string;
     public function setMaptype(string $maptype): PrinterInterface;
 
     public function getCenterX(): int;

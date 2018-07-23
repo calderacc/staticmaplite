@@ -24,11 +24,9 @@ class Printer extends AbstractPrinter
         $this->longitude = 0;
         $this->width = 500;
         $this->height = 350;
-        $this->maptype = $this->tileDefaultSrc;
 
         $this->mapCache = new MapCache($this);
         $this->tileResolver = new CachedTileResolver();
-        $this->tileResolver->setTileLayerUrl($this->tileSrcUrl[$this->maptype]);
     }
 
     public function addMarker(AbstractMarker $marker): Printer
