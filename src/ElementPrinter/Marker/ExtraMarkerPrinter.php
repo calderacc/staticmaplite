@@ -47,7 +47,7 @@ class ExtraMarkerPrinter
     protected $baseShadowHeight = 14;
 
     /** @var float $markerSize */
-    protected $markerSize = 0.75;
+    protected $markerSize = 0.8;
 
     public function __construct()
     {
@@ -79,7 +79,8 @@ class ExtraMarkerPrinter
     protected function paintMarker(Canvas $canvas): ExtraMarkerPrinter
     {
         $markerImage = $this->createMarker();
-
+        $markerImage->resize(new Box($this->baseMarkerWidth * $this->markerSize, $this->baseMarkerHeight * $this->markerSize));
+        
         $destX = floor(($canvas->getWidth() / 2) - $canvas->getTileSize() * ($canvas->getCenterX() - Util::lonToTile($this->marker->getLongitude(), $canvas->getZoom())));
         $destY = floor(($canvas->getHeight() / 2) - $canvas->getTileSize() * ($canvas->getCenterY() - Util::latToTile($this->marker->getLatitude(), $canvas->getZoom())));
 
