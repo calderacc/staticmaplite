@@ -27,7 +27,27 @@
 
 require_once '../vendor/autoload.php';
 
-use StaticMapLite\staticMapLite;
+use StaticMapLite\Element\Factory\Marker\ExtraMarkerFactory;
+use StaticMapLite\Element\Polyline\Polyline;
+use StaticMapLite\Printer\Printer;
 
-$map = new staticMapLite();
-print $map->showMap();
+$printer = new Printer();
+
+$query = new \StaticMapLite\Query\Query();
+$query->setPrinter($printer)->execute();
+
+$guesserList = [
+    new StaticMapLite\Guesser\MapCenterGuesser(),
+    new \StaticMapLite\Guesser\MapTypeGuesser(),
+    new \StaticMapLite\Guesser\MapZoomGuesser(),
+];
+
+foreach ($guesserList as $guesser) {
+    $guesser->setPrinter($printer)->guess();
+}
+
+$printer->showMap();
+
+
+
+
