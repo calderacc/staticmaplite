@@ -650,7 +650,12 @@ class ExtraMarkerFactory
             'yoast'                               => 'f2b1',
             'themeisle'                           => 'f2b2',
             'google-plus-official'                => 'f2b3',
-            'font-awesome'                        => 'f2b4'
+            'font-awesome'                        => 'f2b4',
+            'thermometer-full'                    => 'f2c7',
+            'thermometer-empty'                   => 'f2cb',
+            'thermometer-quarter'                 => 'f2ca',
+            'thermometer-half'                    => 'f2c9',
+            'thermometer-three-quarters'          => 'f2c8',
         ];
 
         if (!array_key_exists($icon, $icons)) {
